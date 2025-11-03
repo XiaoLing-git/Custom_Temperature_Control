@@ -1,0 +1,116 @@
+# 全局默认配置
+default_language_version:
+    python: python3.10  # 指定默认 Python 版本（可写 "3.9" 或 "python3.9"）
+
+minimum_pre_commit_version: 4.2.0   # 最低pro-commit 版本
+
+files: \.(py|json|yaml|makefile)$  # 只处理 Python/json/yaml 文件
+exclude: ^(dist|build|main.py|.*exe$|.git/)  # 不处理 ./dist |./build | .exe结尾的所有对象
+
+
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: debug-statements # 检查代码中是否包含 print 或 pdb
+      - id: check-builtin-literals # 确保使用 `True` 而不是 `true` 等
+      - id: check-case-conflict # 检查文件名大小写冲突（跨平台问题）
+      - id: check-docstring-first # 确保 docstring 在文件开头
+      - id: check-json # 检查 JSON 格式是否正确
+      - id: check-toml # 检查 TOML 格式
+      - id: check-xml # 检查 XML 格式
+      - id: check-yaml # 检查 YAML 格式
+#      - id: detect-private-key # 检查是否有私钥泄露
+      - id: end-of-file-fixer # 文件末尾自动加一个换行
+      - id: trailing-whitespace # 删除行尾空格
+#      - id: check-added-large-files    # 检测是否有大文件提交 默认50MB
+
+-   repo: https://github.com/psf/black  # Black 官方仓库
+    rev: 24.4.2  # 使用的版本（建议选择最新稳定版，参考 https://github.com/psf/black/releases）
+    hooks:
+      - id: black  # 钩子 ID，对应 black 工具
+        name: Format Python code with black  # 钩子名称（自定义，方便识别）
+        language_version: python3.10  # 指定运行 black 的 Python 版本（需与项目兼容）
+        args:  # 传递给 black 的参数
+          - --line-length=120  # 自定义行宽（默认 88，根据团队习惯调整）
+          # - --fast  # 可选：跳过 AST 一致性检查（加快速度，不推荐生产环境）
+
+  # 2. Flake8：Python 代码检查工具（检测语法错误、风格问题等）
+-   repo: https://github.com/PyCQA/flake8  # Flake8 官方仓库
+    rev: 6.0.0  # 使用的版本（建议选择最新稳定版，参考 https://github.com/PyCQA/flake8/releases）
+    hooks:
+      - id: flake8  # 钩子 ID，对应 flake8 工具
+        name: Lint Python code with flake8  # 钩子名称（自定义）
+        args:  # 传递给 flake8 的参数
+          - --max-line-length=120  # 行宽限制（需与 black 保持一致，避免冲突）
+          - --select=D100,D101,D102,D103,D104,D105,D106,D107
+          - --ignore=E203,W503  # 忽略特定规则：
+            # E203：与 black 格式冲突（black 允许冒号前的空格）
+            # W503：与 black 冲突（black 允许逻辑运算符前换行）
+          - --extend-ignore=F401  # 可选：忽略未使用的导入（如需严格检查可删除）
+        additional_dependencies:  # 额外依赖（flake8 插件，扩展检查能力）
+          - flake8-bugbear  # 增加更多代码质量检查规则（如反模式、最佳实践）
+          - flake8-import-order  # 检查导入语句排序是否符合规范
+          - flake8-docstrings>=1.7.0
+  # 3. isort：自动排序 Python 导入语句
+-   repo: https://github.com/pycqa/isort  # isort 官方仓库
+    rev: 5.12.0  # 使用最新稳定版本（参考 https://github.com/PyCQA/isort/releases）
+    hooks:
+      - id: isort  # 钩子 ID，对应 isort 工具
+        name: Sort imports with isort  # 自定义钩子名称
+        args:  # 传递给 isort 的参数
+          - --profile=black  # 与 black 格式化工具兼容（避免格式冲突）
+          - --line-length=120  # 行宽限制（需与 black、flake8 保持一致）
+          - -m=3  # 多行导入格式：3 表示垂直对齐（推荐与 black 配合）
+          - --trailing-comma  # 多行导入末尾添加逗号（符合 black 风格）
+        files: \.py$  # 仅处理 Python 文件
+
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0  # 使用最新稳定版本
+    hooks:
+      - id: mypy
+        name: mypy static type check
+        args:
+          # 核心检查模式
+          - --strict  # 启用严格模式（可选，根据项目需求决定）
+          - --show-error-codes  # 显示错误代码（如 [arg-type]）
+
+          # 忽略缺失的导入（第三方库无类型注解时使用）
+          - --ignore-missing-imports
+
+          # 排除不需要检查的文件/目录（支持多个 --exclude）
+          - --exclude=venv/  # 排除虚拟环境
+          - --exclude=build/  # 排除构建目录
+          - --exclude=tests/legacy/  # 排除旧测试代码
+
+          # 放宽特定检查规则（仅在非严格模式下生效）
+          # - --no-disallow-untyped-defs  # 允许未注解的函数
+          # - --no-error-on-untyped-defs  # 不对未注解函数报错
+
+          # 类型检查细节配置
+          - --allow-redefinition  # 允许变量重定义（如在不同作用域）
+          - --implicit-reexport  # 允许隐式导出（简化模块导入）
+
+        # 仅检查 Python 文件
+        files: \.py$
+
+-   repo: https://github.com/codespell-project/codespell  # 检查拼写
+    rev: v2.4.1
+    hooks:
+        - id: codespell
+          args: [--ignore-words-list=ser]
+
+#-   repo: https://github.com/astral-sh/ruff-pre-commit   # 配置ruff检查
+#    rev: v0.12.8
+#    hooks:
+#        - id: ruff
+#          args: [
+#              --fix,
+#              --exit-non-zero-on-fix, # Ruff 修复后退出码非 0，需要重新 git add 再提交
+#              --target-version=py310,
+#            ]
+#          files: \.py$
+#        - id: ruff-format
+#          files: \.py$
