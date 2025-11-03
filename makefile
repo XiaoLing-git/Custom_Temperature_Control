@@ -67,7 +67,7 @@ update:
 	poetry update
 
 check:
-	$(PRECOMMIT) $(target)
+	$(PRECOMMIT) --all-files
 
 commit:clean
 	git add .
