@@ -23,3 +23,10 @@ class ResponseCode(Enum):
     ENABLE = "A4"
     DISABLE = "A5"
     CALIBRATE = "B5"
+
+    @classmethod
+    def get_map(cls, target: str) -> str:
+        """todo"""
+        response = cls._member_map_.get(target)
+        assert response is not None
+        return str(response.value)  # type ignore[union-attr]

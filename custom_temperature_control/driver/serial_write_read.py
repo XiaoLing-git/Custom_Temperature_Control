@@ -77,10 +77,10 @@ class SerialWriteRead(SerialConnection):
             response = response + self.__read()
             if _length < 4:
                 continue
-            content: str = response[:-4]
-            crc16: str = response[-4:]
+            content: str = response[:-2]
+            crc16: str = response[-2:]
             if modbus_crc16(content) == crc16:
                 break
         logger.debug(f" Read: {response}")
         logger.debug("-" * 100)
-        return response
+        return response[:-2]
