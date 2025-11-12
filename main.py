@@ -44,4 +44,10 @@ if __name__ == "__main__":
                     timeout=10,
                 )
     ser.connect()
-    res = ser.get_version()
+    res = ser.get_status()
+    print(res)
+
+    ser.enable(25.5, 60)
+    while True:
+        time.sleep(3)
+        print(ser.get_status())
