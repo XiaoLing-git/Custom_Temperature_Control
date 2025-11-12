@@ -1,9 +1,13 @@
 """Main function entry, mainly used for debugging."""
 
 import logging
+import time
 
-from art_dam_3254.driver import BaseDriver
-from art_dam_3254.models import AnalogChannel, SwitchStatus, DigitalOutputMode
+from serial import EIGHTBITS, PARITY_NONE, STOPBITS_ONE, Serial
+
+from custom_temperature_control.driver.serial_connection import SerialConnection
+from custom_temperature_control.driver.serial_write_read import SerialWriteRead
+from custom_temperature_control.utils import modbus_crc16
 
 logging.basicConfig(
     level=logging.DEBUG,  # 核心：设置最低日志级别为DEBUG
@@ -12,34 +16,22 @@ logging.basicConfig(
 )
 
 if __name__ == "__main__":
+    # for port in [9600,14400,19200,38400,56000,57600,115200]:
+    #     for addr in range(20):
+    #         try:
+    #             format_addr = int.to_bytes((addr+1),byteorder="big", length=1).hex()
+    #             ser = SerialWriteRead(
+    #                 port="COM13",
+    #                 baud_rate=port,
+    #                 timeout=10,
+    #             )
+    #             ser.connect()
+    #             cmd = f"58{format_addr}0100".upper()
+    #             cmd = cmd + modbus_crc16(cmd)
+    #             ser.write(cmd)
+    #             ser.read()
+    #         except Exception as e:
+    #             ser.disconnect()
+    #             print(e)
 
-    swr = BaseDriver(port="/dev/ttyUSB0",baud_rate=9600,timeout=5,device_address="01")
-    swr.connect()
-
-    res = swr.get_analog_channel_value(AnalogChannel.ch1)
-    print(res)
-
-    res = swr.get_analog_channel_value(AnalogChannel.ch2)
-    print(res)
-
-    res = swr.get_analog_channel_value(AnalogChannel.ch3)
-    print(res)
-
-    res = swr.get_analog_channel_value(AnalogChannel.ch4)
-    print(res)
-
-    res = swr.get_all_analog_channel_value()
-    print(res)
-
-    res = swr.get_digital_input_1_work_mode()
-    print(res)
-
-    res = swr.get_analog_channel_range(AnalogChannel.ch1)
-    print(res)
-
-    res = swr.get_digital_input_1_status()
-    print(res)
-
-    res = swr.set_digital_output_1_status(SwitchStatus.Off,DigitalOutputMode.Engage)
-
-    swr.disconnect()
+    modbus_crc16("58 01 A1 10 48 57 4D 4B 5F 48 43 5F 32 30 32 33 30 34 32 34")
