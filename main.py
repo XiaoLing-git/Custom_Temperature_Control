@@ -35,3 +35,14 @@ if __name__ == "__main__":
     #             print(e)
 
     modbus_crc16("58 01 A1 10 48 57 4D 4B 5F 48 43 5F 32 30 32 33 30 34 32 34")
+
+    ser = SerialWriteRead(
+                    port="COM13",
+                    baud_rate=9600,
+                    timeout=10,
+                )
+    ser.connect()
+    cmd = f"5801A000".upper()
+    cmd = cmd + modbus_crc16(cmd)
+    ser.write(cmd)
+    ser.read()
