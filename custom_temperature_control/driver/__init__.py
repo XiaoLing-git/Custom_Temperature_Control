@@ -73,6 +73,29 @@ class Driver(SerialWriteRead):
             "setup_temperature": setup_temperature,
         }
 
+    @property
+    def run_status(self) -> RunStatus:
+        """TODO"""
+        status = self.get_status()
+        run_status = status["run_status"]
+
+        assert isinstance(run_status, RunStatus)
+        return run_status
+
+    @property
+    def current_temperature(self) -> float:
+        """TODO"""
+        status = self.get_status()
+        value = status["temperature"]
+        return float(value)
+
+    @property
+    def hold_time(self) -> int:
+        """TODO"""
+        status = self.get_status()
+        value = status["duration"]
+        return int(value)
+
     def enable(
         self,
         temperature: float | None = None,
