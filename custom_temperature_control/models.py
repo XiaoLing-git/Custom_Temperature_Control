@@ -1,6 +1,9 @@
 """"todo"."""
 
+import sys
 from enum import Enum
+
+Simulator: bool = True if "win" in sys.platform else False
 
 
 class CommandCode(Enum):

@@ -27,6 +27,21 @@ class SerialConnection:
         self.__ser: Serial | None = None
 
     @property
+    def port(self) -> str:
+        """todo"""
+        return self.__port
+
+    @property
+    def baud_rate(self) -> int:
+        """todo"""
+        return self.__baud_rate
+
+    @property
+    def timeout(self) -> float:
+        """todo"""
+        return self.__timeout
+
+    @property
     def _ser(self) -> Serial:
         """Serial instance, for subclass."""
         if self.__ser is None:
