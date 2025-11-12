@@ -1,5 +1,6 @@
 """TODO"""
 
+import time
 from typing import Any
 
 from opentrons.protocol_api import ProtocolContext
@@ -16,6 +17,10 @@ class Ot2Driver:
         self.__device = Driver(port, baud_rate, timeout)
         self.__simulate: bool = context.is_simulating()
         self.__context = context
+
+        self.__simulate_duration: int = 0
+        self.__simulate_temperature: float = 0
+        self.__simulate_target_temperature: float = 0
 
     @property
     def device(self) -> Driver:
@@ -82,15 +87,25 @@ class Ot2Driver:
         """TODO"""
         self.context.comment(f"Send |Get_Device_Status| Command")
 
+        if self.__simulate_duration > 0:
+            self.__simulate_duration = self.__simulate_duration - 1
+
+        if self.__simulate_temperature > self.__simulate_target_temperature:
+            self.__simulate_temperature = self.__simulate_temperature - 0.1
+        elif self.__simulate_temperature < self.__simulate_target_temperature:
+            self.__simulate_temperature = self.__simulate_temperature + 0.1
+        else:
+            pass
         if self.simulate:
+            time.sleep(1)
             return {
                 "error_code": ErrorCode.normal,
                 "run_status": RunStatus.idle,
                 "control_status": ControlStatus.running,
                 "control_mode": ControlMode.normal,
-                "duration": 0,
-                "temperature": 27,
-                "setup_temperature": 27,
+                "duration": self.__simulate_duration,
+                "temperature": self.__simulate_temperature,
+                "setup_temperature": self.__simulate_target_temperature,
             }
         else:
             return self.device.get_status()
@@ -128,6 +143,9 @@ class Ot2Driver:
         control_mode: ControlMode = ControlMode.normal,
     ) -> str:
         """TODO"""
+
+        self.__simulate_target_temperature = 25 if temperature is None else temperature  # type ignore[assignment]
+        self.__simulate_duration = duration
         self.context.comment(
             f"Send "
             f"|Enable Device {temperature}C {duration}s "
