@@ -2,6 +2,10 @@
 
 import logging
 
+import serial.tools.list_ports
+
+from custom_temperature_control.models import TargetDevicePid
+
 logger = logging.getLogger(__name__)
 
 
@@ -35,3 +39,11 @@ def modbus_crc16(target: str) -> str:
         raise ValueError(f"An exception occurred during calculation: {e}")
     logger.debug(f"Crc16 Target: {target.upper()} Result: {re_result.upper()}")
     return re_result.upper()
+
+
+def get_device_port() -> str:
+    """get_device_port like TargetDevicePid"""
+    for device in serial.tools.list_ports.comports():
+        if device.pid == TargetDevicePid:
+            return str(device.name)
+    raise ValueError("Device Not Found")

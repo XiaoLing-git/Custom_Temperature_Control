@@ -3,7 +3,7 @@
 import sys
 from enum import Enum
 
-Simulator: bool = True if "win" in sys.platform else False
+TargetDevicePid: int = 29987
 
 
 class CommandCode(Enum):

@@ -7,20 +7,29 @@ from opentrons.protocol_api import ProtocolContext
 
 from .driver import Driver
 from .models import ControlMode, ControlStatus, ErrorCode, RunStatus
+from .utils import get_device_port
 
 
 class Ot2Driver:
     """TODO"""
 
-    def __init__(self, port: str, baud_rate: int, timeout: float, context: ProtocolContext) -> None:
+    def __init__(self, context: ProtocolContext, baud_rate: int = 38400, timeout: float = 5) -> None:
         """TODO"""
-        self.__device = Driver(port, baud_rate, timeout)
-        self.__simulate: bool = context.is_simulating()
+
+        # self.__simulate: bool = context.is_simulating()
+        self.__simulate: bool = False
         self.__context = context
 
         self.__simulate_duration: int = 0
         self.__simulate_temperature: float = 0
         self.__simulate_target_temperature: float = 0
+
+        if self.simulate:
+            port = "COM0"
+        else:
+            port = get_device_port()
+
+        self.__device = Driver(port, baud_rate, timeout)
 
     @property
     def device(self) -> Driver:
